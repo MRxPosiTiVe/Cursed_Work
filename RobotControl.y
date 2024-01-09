@@ -38,7 +38,7 @@ int *rock;
 int *makeUpedRock;
 
 // чтение файла окружения
-void readingEnviromentFile(FILE* enviromentFile);
+void readEnvironmentFile(FILE* enviromentFile);
 
 // Структура для узлов в абстрактном синтаксическом дереве (AST)
 struct ast {
@@ -70,19 +70,19 @@ struct ast *newFlow(int nodetype, struct ast *cond, struct ast *tl, struct ast *
 int eval(struct ast *);
 
 // оценка перемещений
-void evalMovements(int value, int checkDirection);
+void evaluateMovements(int value, int checkDirection);
 
 // оценка действий
 void evalActions(int checkAction, int checkDirection);
 
 // проверка наличия объектов вокруг
-int definitionEnvironment(int helperArray[], int checkDirection, int flag);
+int defineEnvironment(int helperArray[], int checkDirection, int flag);
 
 // перезапись массива
-void rewritingArray(int helperArray[], int *array, int sizeArray, int flag);
+void overwriteArray(int helperArray[], int *array, int sizeArray, int flag);
 
 // удаление и освобождение AST
-void treeFree(struct ast *);
+void freeAstTree(struct ast *);
 
 %}
 
@@ -100,7 +100,7 @@ void treeFree(struct ast *);
 %%
 
 commands:
-| commands body { eval($2); treeFree($2); }
+| commands body { eval($2); freeAstTree($2); }
 ;
 
 body: IF OB condition CB FOB body FCB elsee { $$ = newFlow('I', $3, $6, $8); }
@@ -166,7 +166,7 @@ int main() {
     yyout = logFile;
 
     // Чтение файла окружения
-    readingEnviromentFile(enviromentFile);
+    readEnvironmentFile(enviromentFile);
 
     // Инициализация массива makeUpedRock
     // 0 - не Крутой камень, 1 - Крутой камень
@@ -191,7 +191,7 @@ int main() {
 }
 
 // Функция чтения данных из файла окружения
-void readingEnviromentFile(FILE* enviromentFile){
+void readEnvironmentFile(FILE* enviromentFile){
     int numberOfRows = 0; // Переменная для подсчета строк в файле
     fseek(enviromentFile, 0, SEEK_SET); // Устанавливаем указатель файла в начало
     while (!feof(enviromentFile)){
@@ -288,7 +288,7 @@ int eval(struct ast *a){
     int checkDirection;
     int checkAction;
 
-    // Флаг для оценки окружения (для использования в функции definitionEnvironment)
+    // Флаг для оценки окружения (для использования в функции defineEnvironment)
     int flag = -2;
 
     // Вспомогательный массив для оценки окружения
@@ -309,7 +309,7 @@ int eval(struct ast *a){
             counter++;
             value = eval(a->r); // значение шага по времени
             checkDirection = eval(a->l); // оценка направления
-            evalMovements(value, checkDirection); // выполнение движения в заданном направлении
+            evaluateMovements(value, checkDirection); // выполнение движения в заданном направлении
             break;
         case 'a':
             counter++;
@@ -328,7 +328,7 @@ int eval(struct ast *a){
             break;
         case 'F':
             checkDirection = eval(a->l); // оценка направления
-            value = definitionEnvironment(helperArray, checkDirection, flag); // оценка окружения в заданном направлении
+            value = defineEnvironment(helperArray, checkDirection, flag); // оценка окружения в заданном направлении
             break;    
         case 'u':
             value = 0; // вверх
@@ -364,8 +364,8 @@ int eval(struct ast *a){
     return value; // возвращаем значение
 }
 
-// Функция evalMovements оценивает перемещения робота в заданном направлении и на определенное расстояние.
-void evalMovements(int value, int checkDirection){
+// Функция evaluateMovements оценивает перемещения робота в заданном направлении и на определенное расстояние.
+void evaluateMovements(int value, int checkDirection){
     // Для корректного указания позиции при отображении ошибки, создаем временный массив для хранения текущих координат робота.
     int tempRobot[2];
     for(int i = 0; i < n; i++){
@@ -380,7 +380,7 @@ void evalMovements(int value, int checkDirection){
 
     // Перемещаем робота на заданное расстояние в выбранном направлении.
     for(int i = 0; i < value; i++){
-        switch(definitionEnvironment(helperArray, checkDirection, flag)){
+        switch(defineEnvironment(helperArray, checkDirection, flag)){
             // Если вокруг робота есть камень, генерируем ошибку и завершаем программу.
             case 1: 
                 if(checkDirection == 0){ // вверх
@@ -424,7 +424,7 @@ void evalMovements(int value, int checkDirection){
 }
 
 void evalActions(int checkAction, int checkDirection){
-    // строка для удаления или добавления в definitionEnvironment
+    // строка для удаления или добавления в defineEnvironment
     int helperArray[n];
 
     // для указания случая 'DES' или 'M' или 'D'
@@ -433,34 +433,34 @@ void evalActions(int checkAction, int checkDirection){
     switch(checkAction){
         case 'DES': // разнести камень, фактически, строка удаляется из массива
             flag = 0;
-            if(definitionEnvironment(helperArray, checkDirection, flag) == 0){
+            if(defineEnvironment(helperArray, checkDirection, flag) == 0){
                 fprintf(yyout, "%d, Ошибкааа: вы пытаетесь разнести камень, которого нет в точке (%d,%d)\n", counter, helperArray[0], helperArray[1]);
                 exit(1);
             }
-            rewritingArray(helperArray, rock, numberOfRowsFir, flag);
+            overwriteArray(helperArray, rock, numberOfRowsFir, flag);
             fprintf(yyout, "%d. Робот разнес камень в точке (%d,%d)\n", counter, helperArray[0], helperArray[1]);
             break;
         case 'M': // разукрасить камень, 0 заменяется на 1 в массиве makeUpedRock
             flag = 1;
-            if(definitionEnvironment(helperArray, checkDirection, flag) == 0){
+            if(defineEnvironment(helperArray, checkDirection, flag) == 0){
                 fprintf(yyout, "%d. Ошибкааа: вы пытаетесь сделать камень крутым, которого нет в точке (%d,%d)\n", counter, helperArray[0], helperArray[1]);
                 exit(1);
             }
-            if(definitionEnvironment(helperArray, checkDirection, flag) == 2){
+            if(defineEnvironment(helperArray, checkDirection, flag) == 2){
                 fprintf(yyout, "%d. Камень уже крутой в точке (%d,%d)\n", counter, helperArray[0], helperArray[1]);
             }
             else{
-                rewritingArray(helperArray, rock, numberOfRowsFir, flag);
+                overwriteArray(helperArray, rock, numberOfRowsFir, flag);
                 fprintf(yyout, "%d. Робот разукрасил камень (сделал его крутым) в точке(%d,%d)\n", counter, helperArray[0], helperArray[1]);
             }
             break;
         case 'D': // дропнуть камень, новые координаты камня в массиве rock
             flag = 2;
-            if(definitionEnvironment(helperArray, checkDirection, flag) == 1){
+            if(defineEnvironment(helperArray, checkDirection, flag) == 1){
                 fprintf(yyout, "%d. Ошибкааа: в точке (%d,%d) уже есть камень (булыжник)\n", counter, helperArray[0], helperArray[1]);
                 exit(1);
             }
-            rewritingArray(helperArray, rock, numberOfRowsFir, flag);
+            overwriteArray(helperArray, rock, numberOfRowsFir, flag);
             fprintf(yyout, "%d. Робот дропнул камень в точке (%d,%d)\n", counter, helperArray[0], helperArray[1]);
             break;
     }
@@ -471,7 +471,7 @@ void evalActions(int checkAction, int checkDirection){
 //   0 - если в окружении нет камня
 //   1 - если в окружении есть камень
 //   2 - если робот столкнулся с с камнем и прекратил выполнение цикла
-int definitionEnvironment(int helperArray[], int checkDirection, int flag) {
+int defineEnvironment(int helperArray[], int checkDirection, int flag) {
     for(int k = 0; k < numberOfRowsFir; k++) {
         // Координаты текущего камня
         int xFir = *(rock + k * n + 0);
@@ -541,7 +541,7 @@ int definitionEnvironment(int helperArray[], int checkDirection, int flag) {
 }
 
 // Функция перезаписи массива с удалением элемента или обновлением флага
-void rewritingArray(int helperArray[], int *array, int sizeArray, int flag) {
+void overwriteArray(int helperArray[], int *array, int sizeArray, int flag) {
     int xArray, yArray;
     int *tempArray = NULL;
     tempArray = (int*) realloc(tempArray, sizeArray * n * sizeof(int));
@@ -608,18 +608,18 @@ void rewritingArray(int helperArray[], int *array, int sizeArray, int flag) {
  */
  
 // Освобождение памяти занятой AST
-void treeFree(struct ast *a) {
+void freeAstTree(struct ast *a) {
     switch(a->nodetype) {
         // Два поддерева
         case 'T':
         case 'a':
-            treeFree(a->r);
+            freeAstTree(a->r);
 
         // Одно поддерево
         case 's':
         case 'e':
         case 'F':
-            treeFree(a->l);
+            freeAstTree(a->l);
 
         // Нет поддеревьев
         case 'K':
