@@ -67,7 +67,7 @@ struct ast *newNum(int i);
 struct ast *newFlow(int nodetype, struct ast *cond, struct ast *tl, struct ast *el);
 
 // оценка AST
-int eval(struct ast *);
+int evaluate(struct ast *);
 
 // оценка перемещений
 void evaluateMovements(int value, int checkDirection);
@@ -93,18 +93,19 @@ void freeAstTree(struct ast *);
 
 %token <i> STEPS
 %token LEFT RIGHT UP DOWN ROCK TIMES FREE DES M D
-%token IF ELSE OB CB FOB FCB SEMICOLON
+%token IF ELSE WHILE OB CB FOB FCB SEMICOLON
 
 %type <a> body condition elsee statement direction action steps 
 
 %%
 
 commands:
-| commands body { eval($2); freeAstTree($2); }
+| commands body { evaluate($2); freeAstTree($2); }
 ;
 
 body: IF OB condition CB FOB body FCB elsee { $$ = newFlow('I', $3, $6, $8); }
 | IF OB condition CB FOB body FCB { $$ = newFlow('I', $3, $6, NULL); }
+| WHILE OB condition CB FOB body FCB { $$ = newFlow('W', $3, $6, NULL); }
 | statement SEMICOLON { $$ = newAst('s', $1, NULL); }
 ;
 
@@ -278,9 +279,10 @@ struct ast *newFlow(int nodetype, struct ast *cond, struct ast *tl, struct ast *
  *  M makeup(сделать крутым)
  *  D drop rock (дропнуть камень)
  *  I IF statement (условный оператор)
+ *  W WHILE statement
  */ 
 
-int eval(struct ast *a){
+int evaluate(struct ast *a){
     // Значение, возвращаемое функцией
     int value;
 
@@ -300,21 +302,21 @@ int eval(struct ast *a){
             value = ((struct numval *)a)->number; // просто число
             break;
         case 's':
-            eval(a->l); // оператор (statement) - выполняем его
+            evaluate(a->l); // оператор (statement) - выполняем его
             break;
         case 'e':
-            eval(a->l); // иначе (else) - выполняем его
+            evaluate(a->l); // иначе (else) - выполняем его
             break;
         case 'T':
             counter++;
-            value = eval(a->r); // значение шага по времени
-            checkDirection = eval(a->l); // оценка направления
+            value = evaluate(a->r); // значение шага по времени
+            checkDirection = evaluate(a->l); // оценка направления
             evaluateMovements(value, checkDirection); // выполнение движения в заданном направлении
             break;
         case 'a':
             counter++;
-            checkAction = eval(a->l); // оценка действия
-            checkDirection = eval(a->r); // оценка направления
+            checkAction = evaluate(a->l); // оценка действия
+            checkDirection = evaluate(a->r); // оценка направления
             evalActions(checkAction, checkDirection); // выполнение действия в заданном направлении
             break;
         case 'DES':
@@ -327,7 +329,7 @@ int eval(struct ast *a){
             value = 'D'; // дропнуть камень
             break;
         case 'F':
-            checkDirection = eval(a->l); // оценка направления
+            checkDirection = evaluate(a->l); // оценка направления
             value = defineEnvironment(helperArray, checkDirection, flag); // оценка окружения в заданном направлении
             break;    
         case 'u':
@@ -343,9 +345,9 @@ int eval(struct ast *a){
             value = 3; // влево
             break; 
         case 'I':
-            if(eval(((struct flow *)a)->cond) == 0) { // проверка условия - ветка true
+            if(evaluate(((struct flow *)a)->cond) == 0) { // проверка условия - ветка true
                 if(((struct flow *)a)->tl) {
-                    eval(((struct flow *)a)->tl); // выполнение true-ветки
+                    evaluate(((struct flow *)a)->tl); // выполнение true-ветки
                 } 
                 else{
                     value = -1; // значение по умолчанию
@@ -353,11 +355,20 @@ int eval(struct ast *a){
             }
             else { // ветка false
                 if(((struct flow *)a)->el) {
-                    eval(((struct flow *)a)->el); // выполнение false-ветки
+                    evaluate(((struct flow *)a)->el); // выполнение false-ветки
                 } 
                 else {
                     value = -1; // значение по умолчанию
                 }       
+            }
+            break;
+        case 'W':
+            value = -1; // значение по умолчанию
+
+            if(((struct flow *)a)->tl) {
+                while(evaluate(((struct flow *)a)->cond) == 0){
+                    evaluate(((struct flow *)a)->tl); // last value is value
+                }
             }
             break;
     }
@@ -635,6 +646,11 @@ void freeAstTree(struct ast *a) {
         // Условие и цикл
         case 'I':
         break;
+        case 'W':
+            free( ((struct flow *)a)->cond);
+            if( ((struct flow *)a)->tl) free( ((struct flow *)a)->tl);
+            if( ((struct flow *)a)->el) free( ((struct flow *)a)->el);
+            break;
         default: fprintf(yyout, "%d. Внутренняя ошибкааа: освобождение некорректного узла %c\n", counter, a->nodetype);
     }
 }

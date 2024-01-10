@@ -108,7 +108,7 @@ int *rock;
 int *makeUpedRock;
 
 // чтение файла окружения
-void readingEnviromentFile(FILE* enviromentFile);
+void readEnvironmentFile(FILE* enviromentFile);
 
 // Структура для узлов в абстрактном синтаксическом дереве (AST)
 struct ast {
@@ -137,22 +137,22 @@ struct ast *newNum(int i);
 struct ast *newFlow(int nodetype, struct ast *cond, struct ast *tl, struct ast *el);
 
 // оценка AST
-int eval(struct ast *);
+int evaluate(struct ast *);
 
 // оценка перемещений
-void evalMovements(int value, int checkDirection);
+void evaluateMovements(int value, int checkDirection);
 
 // оценка действий
 void evalActions(int checkAction, int checkDirection);
 
 // проверка наличия объектов вокруг
-int definitionEnvironment(int helperArray[], int checkDirection, int flag);
+int defineEnvironment(int helperArray[], int checkDirection, int flag);
 
 // перезапись массива
-void rewritingArray(int helperArray[], int *array, int sizeArray, int flag);
+void overwriteArray(int helperArray[], int *array, int sizeArray, int flag);
 
 // удаление и освобождение AST
-void treeFree(struct ast *);
+void freeAstTree(struct ast *);
 
 
 #line 159 "RobotControl.tab.c"
@@ -199,20 +199,21 @@ enum yysymbol_kind_t
   YYSYMBOL_D = 13,                         /* D  */
   YYSYMBOL_IF = 14,                        /* IF  */
   YYSYMBOL_ELSE = 15,                      /* ELSE  */
-  YYSYMBOL_OB = 16,                        /* OB  */
-  YYSYMBOL_CB = 17,                        /* CB  */
-  YYSYMBOL_FOB = 18,                       /* FOB  */
-  YYSYMBOL_FCB = 19,                       /* FCB  */
-  YYSYMBOL_SEMICOLON = 20,                 /* SEMICOLON  */
-  YYSYMBOL_YYACCEPT = 21,                  /* $accept  */
-  YYSYMBOL_commands = 22,                  /* commands  */
-  YYSYMBOL_body = 23,                      /* body  */
-  YYSYMBOL_elsee = 24,                     /* elsee  */
-  YYSYMBOL_condition = 25,                 /* condition  */
-  YYSYMBOL_statement = 26,                 /* statement  */
-  YYSYMBOL_direction = 27,                 /* direction  */
-  YYSYMBOL_action = 28,                    /* action  */
-  YYSYMBOL_steps = 29                      /* steps  */
+  YYSYMBOL_WHILE = 16,                     /* WHILE  */
+  YYSYMBOL_OB = 17,                        /* OB  */
+  YYSYMBOL_CB = 18,                        /* CB  */
+  YYSYMBOL_FOB = 19,                       /* FOB  */
+  YYSYMBOL_FCB = 20,                       /* FCB  */
+  YYSYMBOL_SEMICOLON = 21,                 /* SEMICOLON  */
+  YYSYMBOL_YYACCEPT = 22,                  /* $accept  */
+  YYSYMBOL_commands = 23,                  /* commands  */
+  YYSYMBOL_body = 24,                      /* body  */
+  YYSYMBOL_elsee = 25,                     /* elsee  */
+  YYSYMBOL_condition = 26,                 /* condition  */
+  YYSYMBOL_statement = 27,                 /* statement  */
+  YYSYMBOL_direction = 28,                 /* direction  */
+  YYSYMBOL_action = 29,                    /* action  */
+  YYSYMBOL_steps = 30                      /* steps  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -540,19 +541,19 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  2
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   39
+#define YYLAST   48
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  21
+#define YYNTOKENS  22
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  9
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  18
+#define YYNRULES  19
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  34
+#define YYNSTATES  41
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   275
+#define YYMAXUTOK   276
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -593,15 +594,15 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15,    16,    17,    18,    19,    20
+      15,    16,    17,    18,    19,    20,    21
 };
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   102,   102,   103,   106,   107,   108,   111,   114,   117,
-     118,   121,   122,   123,   124,   127,   128,   129,   132
+       0,   102,   102,   103,   106,   107,   108,   109,   112,   115,
+     118,   119,   122,   123,   124,   125,   128,   129,   130,   133
 };
 #endif
 
@@ -619,9 +620,9 @@ static const char *const yytname[] =
 {
   "\"end of file\"", "error", "\"invalid token\"", "STEPS", "LEFT",
   "RIGHT", "UP", "DOWN", "ROCK", "TIMES", "FREE", "DES", "M", "D", "IF",
-  "ELSE", "OB", "CB", "FOB", "FCB", "SEMICOLON", "$accept", "commands",
-  "body", "elsee", "condition", "statement", "direction", "action",
-  "steps", YY_NULLPTR
+  "ELSE", "WHILE", "OB", "CB", "FOB", "FCB", "SEMICOLON", "$accept",
+  "commands", "body", "elsee", "condition", "statement", "direction",
+  "action", "steps", YY_NULLPTR
 };
 
 static const char *
@@ -631,7 +632,7 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#define YYPACT_NINF (-24)
+#define YYPACT_NINF (-30)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -645,10 +646,11 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-     -24,     0,   -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,
-     -15,   -24,   -18,     6,     2,    28,   -24,   -24,    10,    28,
-       3,    16,   -24,   -24,    18,   -24,    11,     9,    14,    19,
-     -24,    11,    20,   -24
+     -30,     0,   -30,   -30,   -30,   -30,   -30,   -30,   -30,   -30,
+     -14,    -9,   -30,   -11,    12,    15,    32,    32,   -30,   -30,
+      19,    32,     3,    22,     4,   -30,   -30,    21,   -30,    23,
+      13,    13,    24,    25,    18,   -30,    27,   -30,    13,    28,
+     -30
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -656,22 +658,23 @@ static const yytype_int8 yypact[] =
    means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
-       2,     0,     1,    13,    14,    11,    12,    15,    16,    17,
-       0,     3,     0,     0,     0,     0,     6,    18,     0,     0,
-       0,     0,     9,    10,     0,     8,     0,     0,     5,     0,
-       4,     0,     0,     7
+       2,     0,     1,    14,    15,    12,    13,    16,    17,    18,
+       0,     0,     3,     0,     0,     0,     0,     0,     7,    19,
+       0,     0,     0,     0,     0,    10,    11,     0,     9,     0,
+       0,     0,     0,     0,     5,     6,     0,     4,     0,     0,
+       8
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -24,   -24,   -23,   -24,   -24,   -24,    12,   -24,   -24
+     -30,   -30,   -29,   -30,    17,   -30,    14,   -30,   -30
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-       0,     1,    11,    30,    20,    12,    13,    14,    18
+       0,     1,    12,    37,    22,    13,    14,    15,    20
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -679,42 +682,45 @@ static const yytype_int8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-       2,    15,    16,    27,     3,     4,     5,     6,    32,    17,
-      19,     7,     8,     9,    10,     3,     4,     5,     6,    22,
-      24,     0,     7,     8,     9,    10,    25,    21,    28,    29,
-       0,    23,     3,     4,     5,     6,    26,    31,     0,    33
+       2,    32,    33,    16,     3,     4,     5,     6,    17,    39,
+      18,     7,     8,     9,    10,    19,    11,     3,     4,     5,
+       6,    27,    29,    21,     7,     8,     9,    10,    25,    11,
+      23,    23,    28,    36,    24,    26,     3,     4,     5,     6,
+      30,     0,    31,     0,    34,    35,    38,     0,    40
 };
 
 static const yytype_int8 yycheck[] =
 {
-       0,    16,    20,    26,     4,     5,     6,     7,    31,     3,
-       8,    11,    12,    13,    14,     4,     5,     6,     7,     9,
-      17,    -1,    11,    12,    13,    14,    10,    15,    19,    15,
-      -1,    19,     4,     5,     6,     7,    18,    18,    -1,    19
+       0,    30,    31,    17,     4,     5,     6,     7,    17,    38,
+      21,    11,    12,    13,    14,     3,    16,     4,     5,     6,
+       7,    18,    18,     8,    11,    12,    13,    14,     9,    16,
+      16,    17,    10,    15,    17,    21,     4,     5,     6,     7,
+      19,    -1,    19,    -1,    20,    20,    19,    -1,    20
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
    state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,    22,     0,     4,     5,     6,     7,    11,    12,    13,
-      14,    23,    26,    27,    28,    16,    20,     3,    29,     8,
-      25,    27,     9,    27,    17,    10,    18,    23,    19,    15,
-      24,    18,    23,    19
+       0,    23,     0,     4,     5,     6,     7,    11,    12,    13,
+      14,    16,    24,    27,    28,    29,    17,    17,    21,     3,
+      30,     8,    26,    28,    26,     9,    28,    18,    10,    18,
+      19,    19,    24,    24,    20,    20,    15,    25,    19,    24,
+      20
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    21,    22,    22,    23,    23,    23,    24,    25,    26,
-      26,    27,    27,    27,    27,    28,    28,    28,    29
+       0,    22,    23,    23,    24,    24,    24,    24,    25,    26,
+      27,    27,    28,    28,    28,    28,    29,    29,    29,    30
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
-       0,     2,     0,     2,     8,     7,     2,     4,     2,     3,
-       3,     1,     1,     1,     1,     1,     1,     1,     1
+       0,     2,     0,     2,     8,     7,     7,     2,     4,     2,
+       3,     3,     1,     1,     1,     1,     1,     1,     1,     1
 };
 
 
@@ -1179,102 +1185,108 @@ yyreduce:
     {
   case 3: /* commands: commands body  */
 #line 103 "RobotControl.y"
-                { eval((yyvsp[0].a)); treeFree((yyvsp[0].a)); }
-#line 1184 "RobotControl.tab.c"
+                { evaluate((yyvsp[0].a)); freeAstTree((yyvsp[0].a)); }
+#line 1190 "RobotControl.tab.c"
     break;
 
   case 4: /* body: IF OB condition CB FOB body FCB elsee  */
 #line 106 "RobotControl.y"
                                             { (yyval.a) = newFlow('I', (yyvsp[-5].a), (yyvsp[-2].a), (yyvsp[0].a)); }
-#line 1190 "RobotControl.tab.c"
+#line 1196 "RobotControl.tab.c"
     break;
 
   case 5: /* body: IF OB condition CB FOB body FCB  */
 #line 107 "RobotControl.y"
                                   { (yyval.a) = newFlow('I', (yyvsp[-4].a), (yyvsp[-1].a), NULL); }
-#line 1196 "RobotControl.tab.c"
-    break;
-
-  case 6: /* body: statement SEMICOLON  */
-#line 108 "RobotControl.y"
-                      { (yyval.a) = newAst('s', (yyvsp[-1].a), NULL); }
 #line 1202 "RobotControl.tab.c"
     break;
 
-  case 7: /* elsee: ELSE FOB body FCB  */
-#line 111 "RobotControl.y"
-                         { (yyval.a) = newAst('e', (yyvsp[-1].a), NULL); }
+  case 6: /* body: WHILE OB condition CB FOB body FCB  */
+#line 108 "RobotControl.y"
+                                     { (yyval.a) = newFlow('W', (yyvsp[-4].a), (yyvsp[-1].a), NULL); }
 #line 1208 "RobotControl.tab.c"
     break;
 
-  case 8: /* condition: direction FREE  */
-#line 114 "RobotControl.y"
-                          { (yyval.a) = newAst('F', (yyvsp[-1].a), NULL); }
+  case 7: /* body: statement SEMICOLON  */
+#line 109 "RobotControl.y"
+                      { (yyval.a) = newAst('s', (yyvsp[-1].a), NULL); }
 #line 1214 "RobotControl.tab.c"
     break;
 
-  case 9: /* statement: direction steps TIMES  */
-#line 117 "RobotControl.y"
-                                 { (yyval.a) = newAst('T', (yyvsp[-2].a), (yyvsp[-1].a)); }
+  case 8: /* elsee: ELSE FOB body FCB  */
+#line 112 "RobotControl.y"
+                         { (yyval.a) = newAst('e', (yyvsp[-1].a), NULL); }
 #line 1220 "RobotControl.tab.c"
     break;
 
-  case 10: /* statement: action ROCK direction  */
-#line 118 "RobotControl.y"
-                        { (yyval.a) = newAst('a', (yyvsp[-2].a), (yyvsp[0].a)); }
+  case 9: /* condition: direction FREE  */
+#line 115 "RobotControl.y"
+                          { (yyval.a) = newAst('F', (yyvsp[-1].a), NULL); }
 #line 1226 "RobotControl.tab.c"
     break;
 
-  case 11: /* direction: UP  */
-#line 121 "RobotControl.y"
-              { (yyval.a) = newAst('u', NULL, NULL); }
+  case 10: /* statement: direction steps TIMES  */
+#line 118 "RobotControl.y"
+                                 { (yyval.a) = newAst('T', (yyvsp[-2].a), (yyvsp[-1].a)); }
 #line 1232 "RobotControl.tab.c"
     break;
 
-  case 12: /* direction: DOWN  */
-#line 122 "RobotControl.y"
-       { (yyval.a) = newAst('d', NULL, NULL); }
+  case 11: /* statement: action ROCK direction  */
+#line 119 "RobotControl.y"
+                        { (yyval.a) = newAst('a', (yyvsp[-2].a), (yyvsp[0].a)); }
 #line 1238 "RobotControl.tab.c"
     break;
 
-  case 13: /* direction: LEFT  */
-#line 123 "RobotControl.y"
-       { (yyval.a) = newAst('l', NULL, NULL); }
+  case 12: /* direction: UP  */
+#line 122 "RobotControl.y"
+              { (yyval.a) = newAst('u', NULL, NULL); }
 #line 1244 "RobotControl.tab.c"
     break;
 
-  case 14: /* direction: RIGHT  */
-#line 124 "RobotControl.y"
-        { (yyval.a) = newAst('r', NULL, NULL); }
+  case 13: /* direction: DOWN  */
+#line 123 "RobotControl.y"
+       { (yyval.a) = newAst('d', NULL, NULL); }
 #line 1250 "RobotControl.tab.c"
     break;
 
-  case 15: /* action: DES  */
-#line 127 "RobotControl.y"
-            { (yyval.a) = newAst('DES', NULL, NULL); }
+  case 14: /* direction: LEFT  */
+#line 124 "RobotControl.y"
+       { (yyval.a) = newAst('l', NULL, NULL); }
 #line 1256 "RobotControl.tab.c"
     break;
 
-  case 16: /* action: M  */
-#line 128 "RobotControl.y"
-    { (yyval.a) = newAst('M', NULL, NULL); }
+  case 15: /* direction: RIGHT  */
+#line 125 "RobotControl.y"
+        { (yyval.a) = newAst('r', NULL, NULL); }
 #line 1262 "RobotControl.tab.c"
     break;
 
-  case 17: /* action: D  */
-#line 129 "RobotControl.y"
-    { (yyval.a) = newAst('D', NULL, NULL); }
+  case 16: /* action: DES  */
+#line 128 "RobotControl.y"
+            { (yyval.a) = newAst('DES', NULL, NULL); }
 #line 1268 "RobotControl.tab.c"
     break;
 
-  case 18: /* steps: STEPS  */
-#line 132 "RobotControl.y"
-             { (yyval.a) = newNum((yyvsp[0].i)); }
+  case 17: /* action: M  */
+#line 129 "RobotControl.y"
+    { (yyval.a) = newAst('M', NULL, NULL); }
 #line 1274 "RobotControl.tab.c"
     break;
 
+  case 18: /* action: D  */
+#line 130 "RobotControl.y"
+    { (yyval.a) = newAst('D', NULL, NULL); }
+#line 1280 "RobotControl.tab.c"
+    break;
 
-#line 1278 "RobotControl.tab.c"
+  case 19: /* steps: STEPS  */
+#line 133 "RobotControl.y"
+             { (yyval.a) = newNum((yyvsp[0].i)); }
+#line 1286 "RobotControl.tab.c"
+    break;
+
+
+#line 1290 "RobotControl.tab.c"
 
       default: break;
     }
@@ -1467,7 +1479,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 135 "RobotControl.y"
+#line 136 "RobotControl.y"
 
 
 void yyerror(char *str){
@@ -1502,7 +1514,7 @@ int main() {
     yyout = logFile;
 
     // Чтение файла окружения
-    readingEnviromentFile(enviromentFile);
+    readEnvironmentFile(enviromentFile);
 
     // Инициализация массива makeUpedRock
     // 0 - не Крутой камень, 1 - Крутой камень
@@ -1527,7 +1539,7 @@ int main() {
 }
 
 // Функция чтения данных из файла окружения
-void readingEnviromentFile(FILE* enviromentFile){
+void readEnvironmentFile(FILE* enviromentFile){
     int numberOfRows = 0; // Переменная для подсчета строк в файле
     fseek(enviromentFile, 0, SEEK_SET); // Устанавливаем указатель файла в начало
     while (!feof(enviromentFile)){
@@ -1614,9 +1626,10 @@ struct ast *newFlow(int nodetype, struct ast *cond, struct ast *tl, struct ast *
  *  M makeup(сделать крутым)
  *  D drop rock (дропнуть камень)
  *  I IF statement (условный оператор)
+ *  W WHILE statement
  */ 
 
-int eval(struct ast *a){
+int evaluate(struct ast *a){
     // Значение, возвращаемое функцией
     int value;
 
@@ -1624,7 +1637,7 @@ int eval(struct ast *a){
     int checkDirection;
     int checkAction;
 
-    // Флаг для оценки окружения (для использования в функции definitionEnvironment)
+    // Флаг для оценки окружения (для использования в функции defineEnvironment)
     int flag = -2;
 
     // Вспомогательный массив для оценки окружения
@@ -1636,21 +1649,21 @@ int eval(struct ast *a){
             value = ((struct numval *)a)->number; // просто число
             break;
         case 's':
-            eval(a->l); // оператор (statement) - выполняем его
+            evaluate(a->l); // оператор (statement) - выполняем его
             break;
         case 'e':
-            eval(a->l); // иначе (else) - выполняем его
+            evaluate(a->l); // иначе (else) - выполняем его
             break;
         case 'T':
             counter++;
-            value = eval(a->r); // значение шага по времени
-            checkDirection = eval(a->l); // оценка направления
-            evalMovements(value, checkDirection); // выполнение движения в заданном направлении
+            value = evaluate(a->r); // значение шага по времени
+            checkDirection = evaluate(a->l); // оценка направления
+            evaluateMovements(value, checkDirection); // выполнение движения в заданном направлении
             break;
         case 'a':
             counter++;
-            checkAction = eval(a->l); // оценка действия
-            checkDirection = eval(a->r); // оценка направления
+            checkAction = evaluate(a->l); // оценка действия
+            checkDirection = evaluate(a->r); // оценка направления
             evalActions(checkAction, checkDirection); // выполнение действия в заданном направлении
             break;
         case 'DES':
@@ -1663,8 +1676,8 @@ int eval(struct ast *a){
             value = 'D'; // дропнуть камень
             break;
         case 'F':
-            checkDirection = eval(a->l); // оценка направления
-            value = definitionEnvironment(helperArray, checkDirection, flag); // оценка окружения в заданном направлении
+            checkDirection = evaluate(a->l); // оценка направления
+            value = defineEnvironment(helperArray, checkDirection, flag); // оценка окружения в заданном направлении
             break;    
         case 'u':
             value = 0; // вверх
@@ -1679,9 +1692,9 @@ int eval(struct ast *a){
             value = 3; // влево
             break; 
         case 'I':
-            if(eval(((struct flow *)a)->cond) == 0) { // проверка условия - ветка true
+            if(evaluate(((struct flow *)a)->cond) == 0) { // проверка условия - ветка true
                 if(((struct flow *)a)->tl) {
-                    eval(((struct flow *)a)->tl); // выполнение true-ветки
+                    evaluate(((struct flow *)a)->tl); // выполнение true-ветки
                 } 
                 else{
                     value = -1; // значение по умолчанию
@@ -1689,19 +1702,28 @@ int eval(struct ast *a){
             }
             else { // ветка false
                 if(((struct flow *)a)->el) {
-                    eval(((struct flow *)a)->el); // выполнение false-ветки
+                    evaluate(((struct flow *)a)->el); // выполнение false-ветки
                 } 
                 else {
                     value = -1; // значение по умолчанию
                 }       
             }
             break;
+        case 'W':
+            value = -1; // значение по умолчанию
+
+            if(((struct flow *)a)->tl) {
+                while(evaluate(((struct flow *)a)->cond) == 0){
+                    evaluate(((struct flow *)a)->tl); // last value is value
+                }
+            }
+            break;
     }
     return value; // возвращаем значение
 }
 
-// Функция evalMovements оценивает перемещения робота в заданном направлении и на определенное расстояние.
-void evalMovements(int value, int checkDirection){
+// Функция evaluateMovements оценивает перемещения робота в заданном направлении и на определенное расстояние.
+void evaluateMovements(int value, int checkDirection){
     // Для корректного указания позиции при отображении ошибки, создаем временный массив для хранения текущих координат робота.
     int tempRobot[2];
     for(int i = 0; i < n; i++){
@@ -1716,7 +1738,7 @@ void evalMovements(int value, int checkDirection){
 
     // Перемещаем робота на заданное расстояние в выбранном направлении.
     for(int i = 0; i < value; i++){
-        switch(definitionEnvironment(helperArray, checkDirection, flag)){
+        switch(defineEnvironment(helperArray, checkDirection, flag)){
             // Если вокруг робота есть камень, генерируем ошибку и завершаем программу.
             case 1: 
                 if(checkDirection == 0){ // вверх
@@ -1760,7 +1782,7 @@ void evalMovements(int value, int checkDirection){
 }
 
 void evalActions(int checkAction, int checkDirection){
-    // строка для удаления или добавления в definitionEnvironment
+    // строка для удаления или добавления в defineEnvironment
     int helperArray[n];
 
     // для указания случая 'DES' или 'M' или 'D'
@@ -1769,34 +1791,34 @@ void evalActions(int checkAction, int checkDirection){
     switch(checkAction){
         case 'DES': // разнести камень, фактически, строка удаляется из массива
             flag = 0;
-            if(definitionEnvironment(helperArray, checkDirection, flag) == 0){
+            if(defineEnvironment(helperArray, checkDirection, flag) == 0){
                 fprintf(yyout, "%d, Ошибкааа: вы пытаетесь разнести камень, которого нет в точке (%d,%d)\n", counter, helperArray[0], helperArray[1]);
                 exit(1);
             }
-            rewritingArray(helperArray, rock, numberOfRowsFir, flag);
+            overwriteArray(helperArray, rock, numberOfRowsFir, flag);
             fprintf(yyout, "%d. Робот разнес камень в точке (%d,%d)\n", counter, helperArray[0], helperArray[1]);
             break;
         case 'M': // разукрасить камень, 0 заменяется на 1 в массиве makeUpedRock
             flag = 1;
-            if(definitionEnvironment(helperArray, checkDirection, flag) == 0){
+            if(defineEnvironment(helperArray, checkDirection, flag) == 0){
                 fprintf(yyout, "%d. Ошибкааа: вы пытаетесь сделать камень крутым, которого нет в точке (%d,%d)\n", counter, helperArray[0], helperArray[1]);
                 exit(1);
             }
-            if(definitionEnvironment(helperArray, checkDirection, flag) == 2){
+            if(defineEnvironment(helperArray, checkDirection, flag) == 2){
                 fprintf(yyout, "%d. Камень уже крутой в точке (%d,%d)\n", counter, helperArray[0], helperArray[1]);
             }
             else{
-                rewritingArray(helperArray, rock, numberOfRowsFir, flag);
+                overwriteArray(helperArray, rock, numberOfRowsFir, flag);
                 fprintf(yyout, "%d. Робот разукрасил камень (сделал его крутым) в точке(%d,%d)\n", counter, helperArray[0], helperArray[1]);
             }
             break;
         case 'D': // дропнуть камень, новые координаты камня в массиве rock
             flag = 2;
-            if(definitionEnvironment(helperArray, checkDirection, flag) == 1){
+            if(defineEnvironment(helperArray, checkDirection, flag) == 1){
                 fprintf(yyout, "%d. Ошибкааа: в точке (%d,%d) уже есть камень (булыжник)\n", counter, helperArray[0], helperArray[1]);
                 exit(1);
             }
-            rewritingArray(helperArray, rock, numberOfRowsFir, flag);
+            overwriteArray(helperArray, rock, numberOfRowsFir, flag);
             fprintf(yyout, "%d. Робот дропнул камень в точке (%d,%d)\n", counter, helperArray[0], helperArray[1]);
             break;
     }
@@ -1807,7 +1829,7 @@ void evalActions(int checkAction, int checkDirection){
 //   0 - если в окружении нет камня
 //   1 - если в окружении есть камень
 //   2 - если робот столкнулся с с камнем и прекратил выполнение цикла
-int definitionEnvironment(int helperArray[], int checkDirection, int flag) {
+int defineEnvironment(int helperArray[], int checkDirection, int flag) {
     for(int k = 0; k < numberOfRowsFir; k++) {
         // Координаты текущего камня
         int xFir = *(rock + k * n + 0);
@@ -1877,7 +1899,7 @@ int definitionEnvironment(int helperArray[], int checkDirection, int flag) {
 }
 
 // Функция перезаписи массива с удалением элемента или обновлением флага
-void rewritingArray(int helperArray[], int *array, int sizeArray, int flag) {
+void overwriteArray(int helperArray[], int *array, int sizeArray, int flag) {
     int xArray, yArray;
     int *tempArray = NULL;
     tempArray = (int*) realloc(tempArray, sizeArray * n * sizeof(int));
@@ -1944,18 +1966,18 @@ void rewritingArray(int helperArray[], int *array, int sizeArray, int flag) {
  */
  
 // Освобождение памяти занятой AST
-void treeFree(struct ast *a) {
+void freeAstTree(struct ast *a) {
     switch(a->nodetype) {
         // Два поддерева
         case 'T':
         case 'a':
-            treeFree(a->r);
+            freeAstTree(a->r);
 
         // Одно поддерево
         case 's':
         case 'e':
         case 'F':
-            treeFree(a->l);
+            freeAstTree(a->l);
 
         // Нет поддеревьев
         case 'K':
@@ -1971,6 +1993,11 @@ void treeFree(struct ast *a) {
         // Условие и цикл
         case 'I':
         break;
+        case 'W':
+            free( ((struct flow *)a)->cond);
+            if( ((struct flow *)a)->tl) free( ((struct flow *)a)->tl);
+            if( ((struct flow *)a)->el) free( ((struct flow *)a)->el);
+            break;
         default: fprintf(yyout, "%d. Внутренняя ошибкааа: освобождение некорректного узла %c\n", counter, a->nodetype);
     }
 }

@@ -67,11 +67,12 @@ extern int yydebug;
     D = 268,                       /* D  */
     IF = 269,                      /* IF  */
     ELSE = 270,                    /* ELSE  */
-    OB = 271,                      /* OB  */
-    CB = 272,                      /* CB  */
-    FOB = 273,                     /* FOB  */
-    FCB = 274,                     /* FCB  */
-    SEMICOLON = 275                /* SEMICOLON  */
+    WHILE = 271,                   /* WHILE  */
+    OB = 272,                      /* OB  */
+    CB = 273,                      /* CB  */
+    FOB = 274,                     /* FOB  */
+    FCB = 275,                     /* FCB  */
+    SEMICOLON = 276                /* SEMICOLON  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -85,7 +86,7 @@ union YYSTYPE
     struct ast *a;
     int i;
 
-#line 89 "RobotControl.tab.h"
+#line 90 "RobotControl.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

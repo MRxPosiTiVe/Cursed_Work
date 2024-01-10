@@ -11,6 +11,7 @@
 
 "if"            { return IF; }        // Обнаружено ключевое слово "if"
 "else"          { return ELSE; }      // Обнаружено ключевое слово "else"
+"while"         { return WHILE; }
 "destroy"      { return DES; }        // Обнаружена команда "destroy"
 "makeup"      { return M; }           // Обнаружена команда "makeup"
 "drop"         { return D; }         // Обнаружена команда "drop"
